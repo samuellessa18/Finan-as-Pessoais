@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { PlusCircle, ArrowUpCircle, ArrowDownCircle, WalletCards } from 'lucide-react';
 
 interface TransactionFormProps {
     onAdd: (transaction: any) => void;
@@ -29,19 +29,24 @@ export const TransactionForm = ({ onAdd }: TransactionFormProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 rounded-2xl border border-border bg-card/60 backdrop-blur-sm shadow-sm">
-            <div>
-                <h2 className="text-lg font-semibold tracking-tight">Nova Transação</h2>
-                <p className="text-sm text-muted-foreground">Registre uma nova entrada ou saída.</p>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 rounded-2xl glass-card">
+            <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <WalletCards className="h-5 w-5" />
+                </div>
+                <div>
+                    <h2 className="text-lg font-bold tracking-tight leading-none">Nova Transação</h2>
+                    <p className="text-xs text-muted-foreground mt-1">Registre uma entrada ou saída no sistema</p>
+                </div>
             </div>
 
-            <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-5">
+                <div className="grid grid-cols-2 gap-3">
                     <Button
                         type="button"
                         variant={type === 'income' ? 'default' : 'outline'}
                         onClick={() => setType('income')}
-                        className={`w-full transition-all ${type === 'income' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
+                        className={`w-full transition-all h-11 ${type === 'income' ? 'bg-success hover:bg-success/90 text-success-foreground border-transparent shadow-sm shadow-success/20' : 'border-border/50 text-muted-foreground hover:bg-success/10 hover:text-success'}`}
                     >
                         <ArrowUpCircle className="mr-2 h-4 w-4" /> Entrada
                     </Button>
@@ -49,41 +54,41 @@ export const TransactionForm = ({ onAdd }: TransactionFormProps) => {
                         type="button"
                         variant={type === 'expense' ? 'default' : 'outline'}
                         onClick={() => setType('expense')}
-                        className={`w-full transition-all ${type === 'expense' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                        className={`w-full transition-all h-11 ${type === 'expense' ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground border-transparent shadow-sm shadow-destructive/20' : 'border-border/50 text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                     >
                         <ArrowDownCircle className="mr-2 h-4 w-4" /> Saída
                     </Button>
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Descrição</label>
+                <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Descrição</label>
                     <input
                         type="text"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Ex: Supermercado, Salário..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Valor (R$)</label>
+                <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Valor (R$)</label>
                     <input
                         type="number"
                         step="0.01"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0,00"
-                        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Categoria</label>
+                <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Categoria</label>
                     <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
+                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:ring-1 focus:ring-primary outline-none transition-all appearance-none text-sm"
                     >
                         <option>Geral</option>
                         <option>Alimentação</option>
@@ -95,8 +100,8 @@ export const TransactionForm = ({ onAdd }: TransactionFormProps) => {
                 </div>
             </div>
 
-            <Button type="submit" className="w-full rounded-xl py-6 text-base font-semibold">
-                <PlusCircle className="mr-2 h-5 w-5" /> Adicionar Transação
+            <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold shadow-md hover:scale-[1.02] transition-transform active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground">
+                <PlusCircle className="mr-2 h-5 w-5" /> Confirmar
             </Button>
         </form>
     );

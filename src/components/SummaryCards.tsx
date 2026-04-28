@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Activity } from 'lucide-react';
 
 interface SummaryCardsProps {
     totalBalance: number;
@@ -15,62 +15,92 @@ export const SummaryCards = ({ totalBalance, totalIncome, totalExpenses }: Summa
         }).format(value);
     };
 
+    const efficiency = totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toFixed(1) : '0.0';
+
     const cardVariants = {
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 0, y: 10 },
         visible: { opacity: 1, y: 0 },
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <motion.div
                 variants={cardVariants}
                 initial="hidden"
                 animate="visible"
-                transition={{ duration: 0.4 }}
-                className="p-6 rounded-2xl glass-card gradient-blue text-white shadow-xl overflow-hidden relative"
+                transition={{ duration: 0.3 }}
+                className="p-5 sm:p-6 rounded-2xl glass-card relative overflow-hidden group"
             >
-                <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-blue-100 text-sm font-medium">Saldo Total</span>
-                        <DollarSign className="h-5 w-5 text-blue-200" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Saldo Líquido</span>
+                    <div className="p-2 sm:p-2.5 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                        <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tight">{formatCurrency(totalBalance)}</h2>
                 </div>
-                <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-white/10 rounded-full blur-2xl" />
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter tabular-nums truncate" title={formatCurrency(totalBalance)}>
+                    {formatCurrency(totalBalance)}
+                </h2>
             </motion.div>
 
             <motion.div
                 variants={cardVariants}
                 initial="hidden"
                 animate="visible"
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="p-6 rounded-2xl glass-card gradient-green text-white shadow-xl overflow-hidden relative"
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="p-5 sm:p-6 rounded-2xl glass-card relative overflow-hidden group"
             >
-                <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-emerald-100 text-sm font-medium">Receitas</span>
-                        <TrendingUp className="h-5 w-5 text-emerald-200" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-success" />
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Entradas</span>
+                    <div className="p-2 sm:p-2.5 rounded-full bg-success/10 text-success group-hover:scale-110 transition-transform">
+                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tight">{formatCurrency(totalIncome)}</h2>
                 </div>
-                <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-white/10 rounded-full blur-2xl" />
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter tabular-nums truncate text-success" title={formatCurrency(totalIncome)}>
+                    {formatCurrency(totalIncome)}
+                </h2>
             </motion.div>
 
             <motion.div
                 variants={cardVariants}
                 initial="hidden"
                 animate="visible"
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="p-6 rounded-2xl glass-card gradient-red text-white shadow-xl overflow-hidden relative"
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="p-5 sm:p-6 rounded-2xl glass-card relative overflow-hidden group"
             >
-                <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-red-100 text-sm font-medium">Despesas</span>
-                        <TrendingDown className="h-5 w-5 text-red-200" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Saídas</span>
+                    <div className="p-2 sm:p-2.5 rounded-full bg-destructive/10 text-destructive group-hover:scale-110 transition-transform">
+                        <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tight">{formatCurrency(totalExpenses)}</h2>
                 </div>
-                <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-white/10 rounded-full blur-2xl" />
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter tabular-nums truncate text-destructive" title={formatCurrency(totalExpenses)}>
+                    {formatCurrency(totalExpenses)}
+                </h2>
+            </motion.div>
+
+            <motion.div
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ duration: 0.3, delay: 0.3 }}
+                className="p-5 sm:p-6 rounded-2xl glass-card relative overflow-hidden group"
+            >
+                <div className="absolute top-0 left-0 w-1 h-full bg-accent" />
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Eficiência</span>
+                    <div className="p-2 sm:p-2.5 rounded-full bg-accent/20 text-accent-foreground group-hover:scale-110 transition-transform">
+                        <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                </div>
+                <div className="flex items-baseline gap-2">
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter tabular-nums">
+                        {efficiency}%
+                    </h2>
+                    <span className="text-xs text-muted-foreground">gasto/receita</span>
+                </div>
             </motion.div>
         </div>
     );

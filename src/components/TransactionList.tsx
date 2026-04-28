@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, TrendingUp, TrendingDown, Tag, Calendar } from 'lucide-react';
+import { Trash2, TrendingUp, TrendingDown, Tag, Calendar, ListFilter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -26,23 +26,29 @@ export const TransactionList = ({ transactions, onDelete }: TransactionListProps
     };
 
     return (
-        <div className="bg-card/40 backdrop-blur-md rounded-2xl border border-border shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-border bg-card/20">
-                <h2 className="text-lg font-bold tracking-tight">Histórico de Transações</h2>
-                <p className="text-sm text-muted-foreground">Suas atividades financeiras recentes.</p>
+        <div className="glass-card rounded-2xl overflow-hidden flex flex-col h-full">
+            <div className="p-6 border-b border-border/50 bg-card/40 flex items-center justify-between">
+                <div>
+                    <h2 className="text-lg font-bold tracking-tight">Histórico de Transações</h2>
+                    <p className="text-xs text-muted-foreground mt-1">Acompanhe suas atividades financeiras</p>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-lg">
+                    <ListFilter className="h-3 w-3" />
+                    <span>{transactions.length} {transactions.length === 1 ? 'item' : 'itens'}</span>
+                </div>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="text-xs text-muted-foreground uppercase bg-muted/30">
+            <div className="overflow-x-auto flex-1">
+                <table className="w-full text-left border-collapse">
+                    <thead className="text-[10px] text-muted-foreground uppercase tracking-widest bg-muted/30">
                         <tr>
-                            <th className="px-6 py-4 font-semibold">Descrição</th>
-                            <th className="px-6 py-4 font-semibold">Data</th>
-                            <th className="px-6 py-4 font-semibold">Valor</th>
-                            <th className="px-6 py-4 font-semibold text-right">Ação</th>
+                            <th className="px-6 py-4 font-bold border-b border-border/50">Descrição</th>
+                            <th className="px-6 py-4 font-bold border-b border-border/50">Data</th>
+                            <th className="px-6 py-4 font-bold border-b border-border/50">Valor</th>
+                            <th className="px-6 py-4 font-bold border-b border-border/50 text-right">Ação</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody className="divide-y divide-border/40">
                         <AnimatePresence initial={false}>
                             {transactions.length === 0 ? (
                                 <motion.tr
@@ -50,8 +56,11 @@ export const TransactionList = ({ transactions, onDelete }: TransactionListProps
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                 >
-                                    <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
-                                        Nenhuma transação registrada ainda.
+                                    <td colSpan={4} className="px-6 py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center space-y-3 opacity-50">
+                                            <ListFilter className="h-10 w-10 text-muted-foreground" />
+                                            <p className="text-sm font-medium text-muted-foreground">Nenhuma transação registrada</p>
+                                        </div>
                                     </td>
                                 </motion.tr>
                             ) : (
@@ -59,37 +68,38 @@ export const TransactionList = ({ transactions, onDelete }: TransactionListProps
                                     <motion.tr
                                         key={t.id}
                                         layout
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 10 }}
-                                        className="group hover:bg-muted/30 transition-colors"
+                                        initial={{ opacity: 0, scale: 0.98 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.98 }}
+                                        className="group hover:bg-muted/40 transition-colors"
                                     >
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-lg ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'}`}>
+                                                <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-105 ${t.type === 'income' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                                                     {t.type === 'income' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-sm">{t.description}</p>
-                                                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-wider">
-                                                        <Tag className="h-3 w-3" /> {t.category}
+                                                    <p className="font-semibold text-sm tracking-tight text-foreground">{t.description}</p>
+                                                    <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                                                        <Tag className="h-3 w-3 opacity-70" /> {t.category}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Calendar className="h-4 w-4" />
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                                <Calendar className="h-4 w-4 opacity-70" />
                                                 {format(new Date(t.date), "dd 'de' MMM", { locale: ptBR })}
                                             </div>
                                         </td>
-                                        <td className={`px-6 py-4 font-bold text-sm ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
+                                        <td className={`px-6 py-4 font-bold text-sm tabular-nums whitespace-nowrap ${t.type === 'income' ? 'text-success' : 'text-destructive'}`}>
                                             {t.type === 'income' ? '+' : '-'} {formatCurrency(t.amount)}
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => onDelete(t.id)}
-                                                className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                className="p-2.5 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 bg-background/50 rounded-xl transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                                                title="Excluir Transação"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </button>
