@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ShieldCheck, LineChart, Wallet } from 'lucide-react'
 import { useState } from 'react'
-import axios from 'axios'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
+import { api } from '@/services/api'
 
 export default function Login() {
   const { signInWithGoogle, login, user } = useAuth()
@@ -22,8 +22,7 @@ export default function Login() {
     setIsSubmitting(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const res = await axios.post(`${apiUrl}/api/auth/login`, {
+      const res = await api.post('/auth/login', {
         email,
         password
       })

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '@/services/api';
 
 // Interfaces for clearer typing later
 interface User {
@@ -32,13 +32,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         // Global Axios Interceptor for 401 Unauthorized
-        const interceptor = axios.interceptors.response.use(
+        const interceptor = api.interceptors.response.use(
             (response) => response,
             (error) => {
                 if (error.response?.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    delete axios.defaults.headers.common['Authorization'];
                     window.location.href = '/login';
                 }
                 return Promise.reject(error);
@@ -48,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const initAuth = async () => {
             const token = localStorage.getItem('token');
             if (token) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 await refreshUser();
             } else {
                 setLoading(false);
@@ -57,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         initAuth();
 
         return () => {
-            axios.interceptors.response.eject(interceptor);
+            api.interceptors.response.eject(interceptor);
         };
     }, []);
 
@@ -66,10 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const res = await axios.get(`${apiUrl}/api/users/profile`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/users/profile');
             const userData = res.data;
             
             // Map backend profile response to User interface
@@ -96,7 +91,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const login = (token: string, userData: User) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(userData);
     };
 
@@ -107,7 +101,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signOut = async () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        delete axios.defaults.headers.common['Authorization'];
         setUser(null);
         window.location.href = '/login';
     };
