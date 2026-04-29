@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const interceptor = api.interceptors.response.use(
             (response) => response,
             (error) => {
-                if (error.response?.status === 401) {
+                if (error.response?.status === 401 || error.response?.status === 403) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
                     window.location.href = '/login';
