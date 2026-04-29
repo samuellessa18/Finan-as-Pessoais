@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getNotifications, markNotificationAsRead } from '../services/userService';
+import { useAuth } from './AuthContext';
 
 export interface Notification {
   id: number | string;
@@ -22,10 +23,15 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType>({} as NotificationContextType);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const fetchNotificationsData = async () => {
+    if (!user) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const data = await getNotifications();
@@ -39,7 +45,11 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     fetchNotificationsData();
-  }, []);
+    
+    // Escuta atualizações globais para recarregar notificações (ex: após ações que geram XP/Alertas)
+    window.addEventListener('finance-updated', fetchNotificationsData);
+    return () => window.removeEventListener('finance-updated', fetchNotificationsData);
+  }, [user]);
 
   const markAsRead = async (id: number | string) => {
     try {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getUserProfile } from '../services/userService';
+import { useAuth } from './AuthContext';
 
 interface GamificationContextType {
   xp: number;
@@ -15,12 +16,21 @@ interface GamificationContextType {
 const GamificationContext = createContext<GamificationContextType>({} as GamificationContextType);
 
 export const GamificationProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
   const [streakDays, setStreakDays] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const refreshGamification = useCallback(async () => {
+      if (!user) {
+          setXp(0);
+          setLevel(1);
+          setStreakDays(0);
+          setLoading(false);
+          return;
+      }
+
       try {
           const profile = await getUserProfile();
           setXp(profile.xp || 0);
@@ -31,11 +41,11 @@ export const GamificationProvider = ({ children }: { children: React.ReactNode }
       } finally {
           setLoading(false);
       }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
       refreshGamification();
-  }, [refreshGamification]);
+  }, [refreshGamification, user]);
 
   const xpForNextLevel = level * 100;
   const currentLevelXp = xp % 100;
