@@ -4,17 +4,43 @@ import { SummaryCards } from '@/components/SummaryCards';
 import { TransactionForm } from '@/components/TransactionForm';
 import { TransactionList } from '@/components/TransactionList';
 import { FinanceCharts } from '@/components/FinanceCharts';
-import { Brain, ShieldCheck, Zap } from 'lucide-react';
+import { Brain, ShieldCheck, Zap, Trophy, Target, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGamification } from '@/contexts/GamificationContext';
-import { useState } from 'react';
-import { performCheckIn } from '@/services/userService';
+import { useState, useEffect } from 'react';
+import { performCheckIn, getEmotionalAnalytics, getInsights } from '@/services/userService';
 
 const Index = () => {
-    const { transactions, addTransaction, deleteTransaction, summary, loading } = useTransactions();
+    const { transactions, addTransaction, deleteTransaction, summary, loading: transactionsLoading } = useTransactions();
     const { user } = useAuth();
     const { xp, level, streakDays, progressToNextLevel, currentLevelXp, xpForNextLevel, refreshGamification } = useGamification();
+    
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [insights, setInsights] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [checkingIn, setCheckingIn] = useState(false);
+
+    useEffect(() => {
+        async function loadDashboardData() {
+            try {
+                const [analyticsData, insightsData] = await Promise.all([
+                    getEmotionalAnalytics(),
+                    getInsights()
+                ]);
+                setAnalytics(analyticsData);
+                setInsights(insightsData);
+            } catch (error) {
+                console.error("Erro ao carregar dados do dashboard:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadDashboardData();
+        
+        // Sincroniza quando houver mudanças financeiras
+        window.addEventListener('finance-updated', loadDashboardData);
+        return () => window.removeEventListener('finance-updated', loadDashboardData);
+    }, []);
 
     const handleCheckIn = async () => {
         try {
@@ -81,14 +107,16 @@ const Index = () => {
                             <div className="p-1.5 rounded-lg bg-primary/10">
                                 <Brain className="h-4 w-4 text-primary" />
                             </div>
-                            <h2 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Insights de Hoje</h2>
+                            <h2 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">AI Insight</h2>
                         </div>
-                        <p className="text-sm font-medium leading-relaxed">
-                            Notamos que você reduziu seus gastos gerais em <span className="text-success font-bold">12%</span> neste mês. Fique de olho no seu painel de planejamentos!
+                        <p className="text-sm font-medium leading-relaxed italic">
+                            {insights.length > 0 
+                                ? insights[0].message 
+                                : analytics?.emotional?.preventionMessage || "Sua IA financeira está analisando seus primeiros passos..."}
                         </p>
                     </div>
                     <Link to="/insights" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 mt-4">
-                        Consultar IA Financeira &rarr;
+                        Gerar novo Insight &rarr;
                     </Link>
                 </div>
             </div>
@@ -149,26 +177,27 @@ const Index = () => {
 
                 {/* Badges Vault */}
                 <div className="glass-card p-6 rounded-2xl flex flex-col border-t-4 border-t-accent">
-                    <h2 className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-4 text-center">Suas Conquistas</h2>
+                    <h2 className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-4 text-center">Conquistas</h2>
                     <div className="flex flex-col gap-4 flex-1 justify-center">
-                        <div className="flex items-center gap-3 bg-muted/20 p-2.5 rounded-xl border border-border/30">
-                            <div className="h-10 w-10 flex-shrink-0 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20 text-xl shadow-inner">
-                                🧠
+                        {analytics?.emotional?.badges?.length > 0 ? (
+                            analytics.emotional.badges.slice(0, 2).map((badge: any, i: number) => (
+                                <div key={i} className="flex items-center gap-3 bg-muted/20 p-2.5 rounded-xl border border-border/30">
+                                    <div className="h-10 w-10 flex-shrink-0 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20 text-xl shadow-inner">
+                                        {badge.icon}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold leading-tight">{badge.title}</p>
+                                        <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{badge.description}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-4 opacity-50">
+                                <Trophy className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-[10px] font-bold uppercase tracking-widest">Bloqueado</p>
+                                <p className="text-[9px] mt-1">Mantenha a consistência para ganhar badges.</p>
                             </div>
-                            <div className="flex-1">
-                                <p className="text-xs font-bold leading-tight">Mestre da Prevenção</p>
-                                <p className="text-[10px] text-muted-foreground font-medium mt-0.5">Evitou &gt;50% impulsos</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3 bg-muted/20 p-2.5 rounded-xl border border-border/30">
-                            <div className="h-10 w-10 flex-shrink-0 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20 text-xl shadow-inner">
-                                🎯
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-xs font-bold leading-tight">Focado</p>
-                                <p className="text-[10px] text-muted-foreground font-medium mt-0.5">Meta ativa há 30 dias</p>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -176,17 +205,27 @@ const Index = () => {
                 <div className="glass-card p-6 rounded-2xl flex flex-col justify-between border-t-4 border-t-primary">
                     <div>
                         <h2 className="text-xs uppercase tracking-wider font-black text-primary mb-2 flex items-center gap-1.5">
-                            Quest Ativa
+                            Quest Semanal
                         </h2>
-                        <h3 className="text-lg font-bold tracking-tight mb-1 flex items-center gap-1.5">🍔 Alimentação</h3>
-                        <p className="text-xs text-muted-foreground font-medium mb-3">
-                            Representa <strong className="text-foreground text-sm">35%</strong> dos gastos hoje.
-                        </p>
-                    </div>
-                    <div className="bg-primary/10 border border-primary/20 p-3 rounded-xl mt-auto">
-                        <p className="text-[11px] text-primary font-bold leading-relaxed">
-                            🎯 Reduzir 10% nesse fim de semana te garante <strong className="text-foreground bg-background px-1 rounded mx-0.5">+120 XP</strong> e acelera sua Viagem!
-                        </p>
+                        {analytics?.emotional?.weeklySummary?.highlights?.length > 0 ? (
+                            <>
+                                <h3 className="text-lg font-bold tracking-tight mb-1 flex items-center gap-1.5">📊 Resumo</h3>
+                                <p className="text-xs text-muted-foreground font-medium mb-3">
+                                    {analytics.emotional.weeklySummary.highlights[0]}
+                                </p>
+                                <div className="bg-primary/10 border border-primary/20 p-3 rounded-xl mt-auto">
+                                    <p className="text-[11px] text-primary font-bold leading-relaxed">
+                                        {analytics.emotional.weeklySummary.conclusion}
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full opacity-50 text-center">
+                                <Target className="h-8 w-8 mb-2 text-primary" />
+                                <p className="text-[10px] font-bold uppercase">Em Análise</p>
+                                <p className="text-[9px] mt-1">Sua primeira quest surge após 3 registros.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
