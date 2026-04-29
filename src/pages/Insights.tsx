@@ -82,37 +82,37 @@ export default function Insights() {
                     <span className="text-lg text-muted-foreground ml-1">dias</span>
                 </h2>
                 <p className="text-sm font-bold text-orange-500">
-                    {behavioral?.emotional?.consistencyMessage || "Comece hoje sua jornada!"}
+                    {behavioral?.emotional?.consistencyMessage || "Aguardando primeiro check-in..."}
                 </p>
             </div>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-success/20 bg-gradient-to-br from-card to-success/5 relative overflow-hidden">
             <div className="flex items-center gap-2 text-muted-foreground mb-4">
                 <ArrowUpRight className="w-5 h-5 text-success" />
-                <span className="text-sm font-semibold uppercase tracking-wider">Evolução Clara</span>
+                <span className="text-sm font-semibold uppercase tracking-wider">Controle Preventivo</span>
             </div>
             <div>
                 <p className="text-sm leading-relaxed font-medium text-foreground">
-                    {behavioral?.emotional?.preventionMessage || "Rastreador de comportamento ativo."}
+                    {behavioral?.emotional?.preventionMessage || "O sistema está aprendendo seus hábitos."}
                 </p>
                 <div className="flex items-center gap-1.5 mt-3 text-success">
                     <ShieldCheck className="w-4 h-4" />
-                    <p className="text-sm font-bold">Hoje está no controle seguro.</p>
+                    <p className="text-sm font-bold">Monitoramento de segurança ativo.</p>
                 </div>
             </div>
         </div>
         <div className="glass-card p-6 rounded-2xl border border-primary/20 bg-gradient-to-br from-card to-primary/5 relative overflow-hidden md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 text-muted-foreground mb-4">
                 <TrendingUp className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold uppercase tracking-wider">Ação → Impacto</span>
+                <span className="text-sm font-semibold uppercase tracking-wider">Engajamento Inteligente</span>
             </div>
             <div>
                 <p className="text-sm leading-relaxed font-medium text-foreground">
-                    {behavioral?.emotional?.engagementMessage || "Cada decisão economizada acelera sua meta."}
+                    {behavioral?.emotional?.engagementMessage || "Seus padrões surgirão após 3 dias de uso."}
                 </p>
                 <div className="flex items-center gap-2 mt-3">
                     <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">
-                        {behavioral?.metrics?.smartEngagementRate ? `${Math.round(behavioral.metrics.smartEngagementRate * 100)}% engajamento` : 'Analisando perfil...'}
+                        {behavioral?.metrics?.smartEngagementRate ? `${Math.round(behavioral.metrics.smartEngagementRate * 100)}% engajamento` : 'Analisando engajamento...'}
                     </span>
                 </div>
             </div>
