@@ -24,6 +24,8 @@ const NotificationContext = createContext<NotificationContextType>({} as Notific
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchNotificationsData = async () => {
     if (!user) {
