@@ -8,7 +8,7 @@ import { Brain, ShieldCheck, Zap, Trophy, Target, Lightbulb } from 'lucide-react
 import { Link } from 'react-router-dom';
 import { useGamification } from '@/contexts/GamificationContext';
 import { useState, useEffect } from 'react';
-import { performCheckIn, getEmotionalAnalytics, getInsights } from '@/services/userService';
+import { performCheckIn, getEmotionalAnalytics, getInsights, resetUserData } from '@/services/userService';
 
 const Index = () => {
     const { transactions, addTransaction, deleteTransaction, summary, loading: transactionsLoading } = useTransactions();
@@ -54,6 +54,25 @@ const Index = () => {
         }
     };
 
+    const handleReset = async () => {
+        const confirm = window.confirm(
+            "⚠️ ATENÇÃO: Tem certeza que deseja apagar TODOS os seus dados financeiros? Esta ação não pode ser desfeita."
+        );
+
+        if (!confirm) return;
+
+        try {
+            setLoading(true);
+            await resetUserData();
+            window.location.reload(); // Limpa tudo e reinicia
+        } catch (error) {
+            console.error("Erro ao resetar dados:", error);
+            alert("Erro ao resetar dados. Tente novamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleAddTransaction = async (tx: any) => {
         await addTransaction(tx);
         await refreshGamification();
@@ -93,9 +112,17 @@ const Index = () => {
                         <p className="text-muted-foreground mb-6">
                             Bem-vindo de volta, {displayName.split(' ')[0]}. Você tem {transactions.length} registros seguros na plataforma.
                         </p>
-                        <div className="inline-flex items-center gap-2 text-xs font-bold text-success bg-success/10 px-3 py-1.5 rounded-lg">
-                            <ShieldCheck className="h-4 w-4" />
-                            Ambiente Criptografado
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="inline-flex items-center gap-2 text-xs font-bold text-success bg-success/10 px-3 py-1.5 rounded-lg">
+                                <ShieldCheck className="h-4 w-4" />
+                                Ambiente Criptografado
+                            </div>
+                            <button
+                                onClick={handleReset}
+                                className="text-[10px] uppercase font-black tracking-widest text-destructive hover:bg-destructive/10 border border-destructive/20 px-3 py-1.5 rounded-lg transition-all"
+                            >
+                                Resetar Sistema
+                            </button>
                         </div>
                     </div>
                 </div>
