@@ -51,6 +51,7 @@ export const useTransactions = () => {
       // O backend retorna { transaction, impactMessage }
       if (res.data.transaction) {
         setTransactions((prev) => [res.data.transaction, ...prev]);
+        window.dispatchEvent(new Event('finance-updated'));
       }
     } catch (error) {
        // Se houver warning (conflict 409), ele pode retornar o aviso. 
@@ -64,6 +65,7 @@ export const useTransactions = () => {
     try {
       await api.delete(`/transactions/${id}`);
       setTransactions((prev) => prev.filter((t) => t.id !== id));
+      window.dispatchEvent(new Event('finance-updated'));
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
     }

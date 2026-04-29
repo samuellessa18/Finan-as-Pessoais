@@ -19,7 +19,14 @@ export const FinanceCharts = () => {
                 setLoading(false);
             }
         }
+        
         fetchData();
+
+        // Escuta atualizações globais de finanças para recarregar o gráfico
+        window.addEventListener('finance-updated', fetchData);
+        return () => {
+            window.removeEventListener('finance-updated', fetchData);
+        };
     }, []);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
