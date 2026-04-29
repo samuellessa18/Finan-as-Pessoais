@@ -31,24 +31,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Global Axios Interceptor for 401 Unauthorized
+        // Listener para logout global (evita loops de redirecionamento físico)
+        const handleLogout = () => {
+            setUser(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        };
+
+        window.addEventListener('logout', handleLogout);
+
+        // Global Axios Interceptor for 401 Unauthorized / 403 Forbidden
         const interceptor = api.interceptors.response.use(
             (response) => response,
             (error) => {
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = '/login';
+                    window.dispatchEvent(new Event('logout'));
                 }
                 return Promise.reject(error);
             }
         );
 
         const initAuth = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                await refreshUser();
-            } else {
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    await refreshUser();
+                }
+            } catch (error) {
+                console.error("Auth Initialization Error:", error);
+                window.dispatchEvent(new Event('logout'));
+            } finally {
                 setLoading(false);
             }
         };
@@ -56,6 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => {
             api.interceptors.response.eject(interceptor);
+            window.removeEventListener('logout', handleLogout);
         };
     }, []);
 
@@ -99,10 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signOut = async () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        window.location.href = '/login';
+        window.dispatchEvent(new Event('logout'));
     };
 
     if (loading) {
