@@ -4,14 +4,14 @@ import { SummaryCards } from '@/components/SummaryCards';
 import { TransactionForm } from '@/components/TransactionForm';
 import { TransactionList } from '@/components/TransactionList';
 import { FinanceCharts } from '@/components/FinanceCharts';
-import { Brain, ShieldCheck, Zap, Trophy, Target, Lightbulb } from 'lucide-react';
+import { Brain, ShieldCheck, Zap, Trophy, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGamification } from '@/contexts/GamificationContext';
 import { useState, useEffect } from 'react';
 import { performCheckIn, getEmotionalAnalytics, getInsights, resetUserData } from '@/services/userService';
 
 const Index = () => {
-    const { transactions, addTransaction, deleteTransaction, summary, loading: transactionsLoading } = useTransactions();
+    const { transactions, addTransaction, deleteTransaction, summary } = useTransactions();
     const { user } = useAuth();
     const { xp, level, streakDays, progressToNextLevel, currentLevelXp, xpForNextLevel, refreshGamification } = useGamification();
     
