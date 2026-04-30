@@ -91,8 +91,8 @@ export default function Register() {
               className="w-full h-11 text-base font-medium shadow-sm border-border/50 hover:bg-muted/50"
               onClick={() => {
                 console.log("🚀 Google Register Clicked");
-                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
-                const redirectUrl = `${backendUrl}/auth/google`;
+                const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                const redirectUrl = `${baseUrl}/api/v1/auth/google`;
                 console.log("🔗 Redirecting to:", redirectUrl);
 
                 // Track event without blocking the redirect
