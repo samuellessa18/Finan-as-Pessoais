@@ -7,7 +7,7 @@ import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { api } from '@/services/api'
 
 export default function Login() {
-  const { signInWithGoogle, login, user } = useAuth()
+  const { login, user } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -116,9 +116,19 @@ export default function Login() {
               type="button"
               variant="outline"
               className="w-full h-11 text-base font-medium shadow-sm border-border/50 hover:bg-muted/50"
-              onClick={async () => {
-                await api.post('/analytics/track-public', { type: 'auth_started', metadata: { provider: 'google', type: 'oauth' } });
-                signInWithGoogle();
+              onClick={() => {
+                console.log("🚀 Google Login Clicked");
+                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+                const redirectUrl = `${backendUrl}/auth/google`;
+                console.log("🔗 Redirecting to:", redirectUrl);
+                
+                // Track event without blocking the redirect
+                api.post('/analytics/track-public', { 
+                  type: 'auth_started', 
+                  metadata: { provider: 'google', type: 'oauth' } 
+                }).catch(err => console.error("Telemetry failed:", err));
+
+                window.location.href = redirectUrl;
               }}
             >
               <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
