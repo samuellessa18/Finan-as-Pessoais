@@ -1,6 +1,7 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useState, useEffect } from 'react';
 import { getFinanceChart } from '../services/financeService';
+import { Activity } from 'lucide-react';
 
 export const FinanceCharts = () => {
     const [data, setData] = useState<any>(null);
@@ -45,23 +46,27 @@ export const FinanceCharts = () => {
         );
     }
 
-    if (!data || !data.dailyData) {
+    if (!data || !data.dailyData || data.dailyData.length === 0) {
         return (
-            <div className="h-[300px] w-full glass-card rounded-2xl flex items-center justify-center">
-                <p className="text-muted-foreground text-sm">Nenhum dado ainda — adicione sua primeira transação.</p>
+            <div className="h-[300px] w-full glass-card rounded-2xl flex flex-col items-center justify-center border-dashed border-2 border-border/50">
+                <div className="p-4 rounded-full bg-muted/20 mb-4">
+                    <Activity className="h-8 w-8 text-muted-foreground/50" />
+                </div>
+                <p className="text-muted-foreground text-sm font-medium">Nenhum dado financeiro para este período.</p>
+                <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest mt-1">Adicione transações para gerar projeções</p>
             </div>
         );
     }
 
     if (!mounted) return null;
 
-    let runningBalance = data.userMonthlyIncome || 0;
+    let runningBalance = 0; // Começa em 0 conforme regra "Zero UI Falsa"
     const pastData = data.dailyData.map((d: any) => {
-        runningBalance += (d.income || 0) - (d.expenses || 0);
+        runningBalance += (d?.income || 0) - (d?.expenses || 0);
         return {
-            date: d.date,
-            income: d.income === 0 ? null : d.income,
-            expenses: d.expenses === 0 ? null : d.expenses,
+            date: d?.date,
+            income: d?.income === 0 ? null : d?.income,
+            expenses: d?.expenses === 0 ? null : d?.expenses,
             projected: null,
             balance: runningBalance
         };

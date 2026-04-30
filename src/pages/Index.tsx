@@ -7,14 +7,17 @@ import { FinanceCharts } from '@/components/FinanceCharts';
 import { Brain, ShieldCheck, Zap, Trophy, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGamification } from '@/contexts/GamificationContext';
+import { useGrowthActions } from '@/hooks/useGrowthActions';
 import { useState, useEffect } from 'react';
 import { performCheckIn, getEmotionalAnalytics, getInsights, resetUserData } from '@/services/userService';
+import { toast } from 'sonner';
 
 const Index = () => {
-    const { transactions, addTransaction, deleteTransaction, summary } = useTransactions();
+    const { transactions, addTransaction, deleteTransaction, summary, lastUpdated } = useTransactions();
     const { user } = useAuth();
     const { xp, level, streakDays, progressToNextLevel, currentLevelXp, xpForNextLevel, refreshGamification } = useGamification();
     
+    const { actions: growthActions, markAsCompleted } = useGrowthActions();
     const [analytics, setAnalytics] = useState<any>(null);
     const [insights, setInsights] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -36,19 +39,16 @@ const Index = () => {
             }
         }
         loadDashboardData();
-        
-        // Sincroniza quando houver mudanças financeiras
-        window.addEventListener('finance-updated', loadDashboardData);
-        return () => window.removeEventListener('finance-updated', loadDashboardData);
-    }, []);
+    }, [lastUpdated]);
 
     const handleCheckIn = async () => {
         try {
             setCheckingIn(true);
             await performCheckIn();
             await refreshGamification();
-        } catch (error) {
-            console.error("Erro no check-in:", error);
+            toast.success('Check-in diário realizado! +5 XP');
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Erro no check-in.');
         } finally {
             setCheckingIn(false);
         }
@@ -63,11 +63,12 @@ const Index = () => {
 
         try {
             setLoading(true);
+            toast.loading('Limpando seus dados...', { id: 'reset' });
             await resetUserData();
-            window.location.reload(); // Limpa tudo e reinicia
+            toast.success('Sistema resetado com sucesso!', { id: 'reset' });
+            setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
-            console.error("Erro ao resetar dados:", error);
-            alert("Erro ao resetar dados. Tente novamente.");
+            toast.error('Erro ao resetar dados.', { id: 'reset' });
         } finally {
             setLoading(false);
         }
@@ -97,6 +98,25 @@ const Index = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-6 space-y-6 animate-fade-in">
+            {/* Growth Banners */}
+            {growthActions.map((action) => (
+                <div key={action.id} className="bg-primary/90 text-primary-foreground p-4 rounded-2xl flex items-center justify-between shadow-lg animate-bounce-subtle">
+                    <div className="flex items-center gap-3">
+                        <Zap className="h-5 w-5 fill-current" />
+                        <div>
+                            <p className="font-bold text-sm">Dica Pro: {action.type === 'onboarding_tour' ? 'Comece com o pé direito!' : 'Sentimos sua falta!'}</p>
+                            <p className="text-xs opacity-90">Que tal explorar as novas funcionalidades de IA hoje?</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => markAsCompleted(action.id)}
+                        className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-xs font-bold transition-colors"
+                    >
+                        Entendido
+                    </button>
+                </div>
+            ))}
+
             {/* Hero & Insights Row */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 
@@ -117,6 +137,21 @@ const Index = () => {
                                 <ShieldCheck className="h-4 w-4" />
                                 Ambiente Criptografado
                             </div>
+                             <div className={`inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm ${
+                               user?.plan === 'pro' 
+                                 ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white border-transparent' 
+                                 : 'bg-muted/30 text-muted-foreground border-border/50'
+                             }`}>
+                                {user?.plan || 'free'}
+                             </div>
+                             {user?.plan !== 'pro' && (
+                                <button 
+                                    onClick={() => trackBehaviorEvent('upgrade_clicked', 'header_badge')}
+                                    className="text-[10px] font-bold text-primary hover:underline"
+                                >
+                                    Upgrade
+                                </button>
+                             )}
                             <button
                                 onClick={handleReset}
                                 className="text-[10px] uppercase font-black tracking-widest text-destructive hover:bg-destructive/10 border border-destructive/20 px-3 py-1.5 rounded-lg transition-all"
@@ -139,8 +174,44 @@ const Index = () => {
                         <p className="text-sm font-medium leading-relaxed italic">
                             {insights.length > 0 
                                 ? insights[0].message 
-                                : analytics?.emotional?.preventionMessage || "Sua IA financeira está analisando seus primeiros passos..."}
+                                : (analytics?.emotional?.preventionMessage || "Aguardando dados suficientes para gerar insights personalizados.")}
                         </p>
+                        {analytics?.emotional?.aiUsage && analytics.emotional.aiUsage.current > 0 && (
+                            <div className="mt-3 pt-3 border-t border-border/30">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Uso Diário de IA</span>
+                                    <span className="text-[10px] font-bold">
+                                        {analytics.emotional.aiUsage.current}/{analytics.emotional.aiUsage.limit}
+                                    </span>
+                                </div>
+                                <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                                    <div 
+                                        className={`h-full transition-all duration-500 ${
+                                            analytics.emotional.aiUsage.current >= analytics.emotional.aiUsage.limit 
+                                                ? 'bg-destructive' 
+                                                : 'bg-primary'
+                                        }`}
+                                        style={{ width: `${(analytics.emotional.aiUsage.current / analytics.emotional.aiUsage.limit) * 100}%` }}
+                                    ></div>
+                                </div>
+                                {analytics.emotional.aiUsage.current >= analytics.emotional.aiUsage.limit && (
+                                    <div className="mt-2 space-y-2">
+                                        <p className="text-[9px] text-destructive font-bold animate-pulse">
+                                            Limite diário atingido. Faça upgrade para PRO!
+                                        </p>
+                                        <button 
+                                            onClick={() => {
+                                                trackBehaviorEvent('upgrade_clicked', 'ai_limit_reached');
+                                                toast.info('Em breve: Planos PRO com IA ilimitada!');
+                                            }}
+                                            className="w-full text-[10px] bg-primary text-white font-black py-1.5 rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                                        >
+                                            DESBLOQUEAR PRO ⚡
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <Link to="/insights" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1 mt-4">
                         Gerar novo Insight &rarr;
@@ -257,11 +328,49 @@ const Index = () => {
                 </div>
             </div>
 
+            {/* Onboarding State: Primeiro Uso */}
+            {transactions.length === 0 && (
+                <div className="glass-card p-8 rounded-3xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <Brain className="h-32 w-32 rotate-12" />
+                    </div>
+                    <div className="max-w-2xl">
+                        <h2 className="text-3xl font-black tracking-tighter mb-4">Bem-vindo ao <span className="text-primary">FinMind</span>.</h2>
+                        <p className="text-lg text-muted-foreground font-medium mb-6 leading-relaxed">
+                            Seu novo consultor financeiro não é apenas uma planilha. É uma inteligência que aprende com seus hábitos para proteger seu futuro.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-1 bg-card/80 p-4 rounded-2xl border border-border/50 shadow-sm">
+                                <div className="h-8 w-8 bg-success/10 text-success rounded-lg flex items-center justify-center mb-3">
+                                    <Trophy className="h-4 w-4" />
+                                </div>
+                                <h3 className="font-bold text-sm mb-1">Passo 1: Ativação</h3>
+                                <p className="text-[11px] text-muted-foreground leading-snug">Registre sua primeira renda ou gasto para começar o monitoramento.</p>
+                            </div>
+                            <div className="flex-1 bg-card/80 p-4 rounded-2xl border border-border/50 shadow-sm">
+                                <div className="h-8 w-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center mb-3">
+                                    <Brain className="h-4 w-4" />
+                                </div>
+                                <h3 className="font-bold text-sm mb-1">Passo 2: Inteligência</h3>
+                                <p className="text-[11px] text-muted-foreground leading-snug">Após 3 registros, nossa IA começará a gerar insights personalizados.</p>
+                            </div>
+                        </div>
+                        <div className="mt-8">
+                            <Link to="#transaction-form" className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-black px-6 py-3 rounded-xl shadow-lg shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                                Criar minha primeira transação &rarr;
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Financial Overview Metrics */}
             <SummaryCards 
-                totalBalance={summary.totalBalance + (user?.monthlyIncome || 0)} 
-                totalIncome={summary.totalIncome + (user?.monthlyIncome || 0)} 
+                totalBalance={summary.totalBalance} 
+                totalIncome={summary.totalIncome} 
                 totalExpenses={summary.totalExpenses} 
+                trend={summary.trend}
+                trendDirection={summary.trendDirection}
             />
             
             {/* Visual Analytics */}

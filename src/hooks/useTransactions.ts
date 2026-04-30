@@ -12,13 +12,33 @@ export interface Transaction {
 
 export const useTransactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [summary, setSummary] = useState({
+    totalBalance: 0,
+    totalIncome: 0,
+    totalExpenses: 0,
+    trend: null as number | null,
+    trendDirection: null as string | null
+  });
   const [loading, setLoading] = useState(true);
+
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
+
+  const fetchSummary = async () => {
+    try {
+      const res = await api.get('/finance/summary');
+      setSummary(res.data);
+    } catch (error) {
+      console.error('Erro ao buscar resumo financeiro:', error);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       const res = await api.get('/transactions');
       setTransactions(res.data);
+      await fetchSummary();
+      setLastUpdated(Date.now());
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
     } finally {
@@ -30,34 +50,17 @@ export const useTransactions = () => {
     fetchTransactions();
   }, []);
 
-  const summary = useMemo(() => {
-    const totalIncome = transactions
-      .filter((t) => t.type === 'income')
-      .reduce((acc, t) => acc + t.amount, 0);
-    const totalExpenses = transactions
-      .filter((t) => t.type === 'expense')
-      .reduce((acc, t) => acc + t.amount, 0);
-
-    return {
-      totalBalance: totalIncome - totalExpenses,
-      totalIncome,
-      totalExpenses,
-    };
-  }, [transactions]);
-
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
       const res = await api.post('/transactions', transaction);
-      // O backend retorna { transaction, impactMessage }
       if (res.data.transaction) {
         setTransactions((prev) => [res.data.transaction, ...prev]);
-        window.dispatchEvent(new Event('finance-updated'));
+        await fetchSummary();
+        setLastUpdated(Date.now());
       }
     } catch (error) {
-       // Se houver warning (conflict 409), ele pode retornar o aviso. 
-       // Para simplificar agora, apenas logamos.
       console.error('Erro ao adicionar transação:', error);
-      throw error; // Repassa para o formulário tratar se necessário (ex: confirmar warning)
+      throw error;
     }
   };
 
@@ -65,11 +68,12 @@ export const useTransactions = () => {
     try {
       await api.delete(`/transactions/${id}`);
       setTransactions((prev) => prev.filter((t) => t.id !== id));
-      window.dispatchEvent(new Event('finance-updated'));
+      await fetchSummary();
+      setLastUpdated(Date.now());
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
     }
   };
 
-  return { transactions, addTransaction, deleteTransaction, summary, loading };
+  return { transactions, addTransaction, deleteTransaction, summary, loading, refreshData: fetchTransactions, lastUpdated };
 };

@@ -5,9 +5,11 @@ interface SummaryCardsProps {
     totalBalance: number;
     totalIncome: number;
     totalExpenses: number;
+    trend?: number | null;
+    trendDirection?: string | null;
 }
 
-export const SummaryCards = ({ totalBalance, totalIncome, totalExpenses }: SummaryCardsProps) => {
+export const SummaryCards = ({ totalBalance, totalIncome, totalExpenses, trend, trendDirection }: SummaryCardsProps) => {
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -41,6 +43,12 @@ export const SummaryCards = ({ totalBalance, totalIncome, totalExpenses }: Summa
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-tighter tabular-nums truncate" title={formatCurrency(totalBalance)}>
                     {formatCurrency(totalBalance)}
                 </h2>
+                {trend !== undefined && trend !== null && (
+                    <p className={`text-[10px] font-bold mt-2 flex items-center gap-1 ${trendDirection === 'up' ? 'text-success' : 'text-destructive'}`}>
+                        {trendDirection === 'up' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {trend}% em relação ao período anterior
+                    </p>
+                )}
             </motion.div>
 
             <motion.div

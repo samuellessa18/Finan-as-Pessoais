@@ -8,6 +8,7 @@ interface User {
     name?: string;
     onboardingCompleted: boolean;
     monthlyIncome?: number;
+    plan?: 'free' | 'pro';
     user_metadata?: {
         full_name?: string;
         avatar_url?: string;
@@ -87,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 name: userData.name,
                 onboardingCompleted: userData.onboardingCompleted,
                 monthlyIncome: userData.monthlyIncome,
+                plan: userData.plan,
                 user_metadata: {
                     full_name: userData.name
                 }
@@ -108,7 +110,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const signInWithGoogle = async () => {
-        console.log('Real OAuth with Google flow initiated');
+        // Redireciona o navegador para o fluxo OAuth do backend
+        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+        window.location.href = `${backendUrl}/auth/google`;
     };
 
     const signOut = async () => {

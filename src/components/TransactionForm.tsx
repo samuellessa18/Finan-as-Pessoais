@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { PlusCircle, ArrowUpCircle, ArrowDownCircle, WalletCards } from 'lucide-react';
+import { PlusCircle, ArrowUpCircle, ArrowDownCircle, WalletCards, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TransactionFormProps {
     onAdd: (transaction: any) => void;
@@ -12,20 +11,30 @@ export const TransactionForm = ({ onAdd }: TransactionFormProps) => {
     const [type, setType] = useState<'income' | 'expense'>('expense');
     const [category, setCategory] = useState('Geral');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!description || !amount) return;
 
-        onAdd({
-            description,
-            amount: parseFloat(amount),
-            type,
-            category,
-            date: new Date().toISOString(),
-        });
+        try {
+            setLoading(true);
+            await onAdd({
+                description,
+                amount: parseFloat(amount),
+                type,
+                category,
+                date: new Date().toISOString(),
+            });
 
-        setDescription('');
-        setAmount('');
+            setDescription('');
+            setAmount('');
+            toast.success('Transação registrada com sucesso!');
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Erro ao registrar transação.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -85,23 +94,27 @@ export const TransactionForm = ({ onAdd }: TransactionFormProps) => {
 
                 <div className="space-y-1.5 focus-within:text-primary transition-colors">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">Categoria</label>
-                    <select
+                    <input
+                        type="text"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:ring-1 focus:ring-primary outline-none transition-all appearance-none text-sm"
-                    >
-                        <option>Geral</option>
-                        <option>Alimentação</option>
-                        <option>Transporte</option>
-                        <option>Lazer</option>
-                        <option>Saúde</option>
-                        <option>Outros</option>
-                    </select>
+                        placeholder="Ex: Alimentação, Lazer..."
+                        className="w-full px-4 py-3 rounded-xl border border-border/50 bg-background/50 focus:bg-background focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                    />
                 </div>
             </div>
 
-            <Button type="submit" className="w-full rounded-xl h-12 text-base font-semibold shadow-md hover:scale-[1.02] transition-transform active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground">
-                <PlusCircle className="mr-2 h-5 w-5" /> Confirmar
+            <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full rounded-xl h-12 text-base font-semibold shadow-md hover:scale-[1.02] transition-transform active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-70"
+            >
+                {loading ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                    <PlusCircle className="mr-2 h-5 w-5" />
+                )}
+                {loading ? 'Processando...' : 'Confirmar'}
             </Button>
         </form>
     );
