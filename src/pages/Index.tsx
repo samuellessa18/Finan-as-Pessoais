@@ -9,7 +9,8 @@ import { Link } from 'react-router-dom';
 import { useGamification } from '@/contexts/GamificationContext';
 import { useGrowthActions } from '@/hooks/useGrowthActions';
 import { useState, useEffect } from 'react';
-import { performCheckIn, getEmotionalAnalytics, getInsights, resetUserData, trackBehaviorEvent } from '@/services/userService';
+import { performCheckIn, getEmotionalAnalytics, getInsights, resetUserData } from '@/services/userService';
+import { trackBehaviorEvent } from '../services/telemetry';
 import { toast } from 'sonner';
 
 const Index = () => {
