@@ -1,8 +1,14 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
+export const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const apiBaseURL = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
+
 export const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1`,
+  baseURL: apiBaseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // 🔄 RESILIÊNCIA: Retry automático para erros de rede ou 5xx
