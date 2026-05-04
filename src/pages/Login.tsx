@@ -143,7 +143,9 @@ export default function Login() {
               variant="outline"
               className="w-full h-14 text-base font-medium rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 transition-all flex items-center justify-center gap-3 group"
               onClick={() => {
-                const baseUrl = import.meta.env.VITE_API_URL || 'https://finmind-api-y31d.onrender.com/api/v1';
+                const envUrl = import.meta.env.VITE_API_URL || 'https://finmind-api-y31d.onrender.com/api/v1';
+                // Garante que o /api/v1 esteja presente
+                const baseUrl = envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
                 window.location.href = `${baseUrl}/auth/google`;
               }}
             >
