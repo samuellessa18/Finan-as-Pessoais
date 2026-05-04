@@ -47,7 +47,12 @@ export const useTransactions = () => {
   };
 
   useEffect(() => {
-    fetchTransactions();
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchTransactions();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {

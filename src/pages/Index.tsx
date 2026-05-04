@@ -26,6 +26,8 @@ const Index = () => {
 
     useEffect(() => {
         async function loadDashboardData() {
+            if (!user) return;
+            
             try {
                 const [analyticsData, insightsData] = await Promise.all([
                     getEmotionalAnalytics(),
@@ -40,7 +42,7 @@ const Index = () => {
             }
         }
         loadDashboardData();
-    }, [lastUpdated]);
+    }, [user, lastUpdated]);
 
     const handleCheckIn = async () => {
         try {
