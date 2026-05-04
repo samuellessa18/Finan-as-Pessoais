@@ -25,37 +25,29 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
-
-    --chart-income: 142.1 76.2% 36.3%;
-    --chart-expense: 0 84.2% 60.2%;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 223 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 222.2 47.4% 11.2%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --success: 142.1 70.6% 45.3%;
-    --success-foreground: 144.9 80.4% 10%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-
-    --chart-income: 142.1 70.6% 45.3%;
-    --chart-expense: 0 62.8% 30.6%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 214.1 15.8% 14.9%;
   }
 }
 
@@ -63,38 +55,50 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
   }
 }
 
-.glass-card {
-  @apply bg-card/85 backdrop-blur-md border border-border shadow-sm;
+/* Premium Animations */
+@keyframes mesh-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.finance-grid {
-  background-image: linear-gradient(to right, hsl(var(--border)/0.45) 1px, transparent 1px),
-                    linear-gradient(to bottom, hsl(var(--border)/0.45) 1px, transparent 1px);
-  background-size: 40px 40px;
+.animate-mesh {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e1b4b);
+  background-size: 400% 400%;
+  animation: mesh-gradient 15s ease infinite;
 }
 
-.tech-surface {
-  background: radial-gradient(circle at top left, hsl(var(--primary)/0.08), transparent 40%),
-              radial-gradient(circle at bottom right, hsl(var(--accent)/0.05), transparent 40%),
-              hsl(var(--background));
+/* Glassmorphism */
+.glass-panel {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
 }
 
-.gradient-green {
-  background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success)/0.8) 100%);
+.glass-card-premium {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.gradient-red {
-  background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(var(--destructive)/0.8) 100%);
+/* Custom Gradients */
+.bg-premium-gradient {
+  background: radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
 }
 
-.gradient-blue {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%);
+.text-gradient-primary {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 font-bold;
+}
+
+/* Utilities */
+.finance-grid-overlay {
+  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+  background-size: 24px 24px;
 }
