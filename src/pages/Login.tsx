@@ -2,14 +2,26 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ShieldCheck, LineChart, Wallet, ArrowRight } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { api } from '@/services/api'
 import { motion } from 'framer-motion'
 
 export default function Login() {
-  const { login, user } = useAuth()
+  const { login, user, signOut } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    // 🧹 LIMPEZA DE SEGURANÇA: Remove qualquer lixo de sessão antiga que possa causar loops
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && !user) {
+        console.log("🧹 Limpando sessão fantasma detectada...");
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    }
+  }, [user]);
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
