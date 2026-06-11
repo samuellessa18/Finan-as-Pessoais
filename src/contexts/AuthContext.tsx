@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '@/services/api';
 
 // Interfaces for clearer typing later
@@ -45,7 +45,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const interceptor = api.interceptors.response.use(
             (response) => response,
             (error) => {
-                if (error.response?.status === 401 || error.response?.status === 403) {
+                // [FIX] Não deslogar em 401/403 de endpoints de auth (login/register/
+                // exchange): ali o 401 = credencial/code inválido, não sessão expirada.
+                const url = error.config?.url || '';
+                const isAuthEndpoint =
+                    url.includes('/auth/google/exchange') ||
+                    url.includes('/auth/login') ||
+                    url.includes('/auth/register');
+                if (!isAuthEndpoint && (error.response?.status === 401 || error.response?.status === 403)) {
                     window.dispatchEvent(new Event('logout'));
                 }
                 return Promise.reject(error);
@@ -103,11 +110,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const login = (token: string, userData: User) => {
+    const login = useCallback((token: string, userData: User) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
-    };
+    }, []);
 
     const signInWithGoogle = async () => {
         // Redireciona o navegador para o fluxo OAuth do backend

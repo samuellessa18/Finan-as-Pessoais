@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/services/api';
@@ -9,8 +9,15 @@ export default function GoogleCallback() {
     const navigate = useNavigate();
     const { login } = useAuth();
     const [status, setStatus] = useState('Processando autenticação...');
+    const didExchange = useRef(false);
 
     useEffect(() => {
+        // [FIX] O code OAuth é de uso único (backend deleta no 1º exchange). StrictMode
+        // (double-invoke em dev) e o re-render por `login` instável re-disparavam o
+        // exchange → 2º POST = 401 → logout. Esta guarda garante UMA troca por callback.
+        if (didExchange.current) return;
+        didExchange.current = true;
+
         const exchangeCode = async () => {
             const code = searchParams.get('code');
             
@@ -25,6 +32,9 @@ export default function GoogleCallback() {
                 // Troca o código temporário pelo JWT real (Fluxo Seguro Option A)
                 const res = await api.post('/auth/google/exchange', { code });
                 const { user, token } = res.data;
+
+                // Remove o code da URL para impedir reprocessamento (refresh/voltar)
+                window.history.replaceState({}, document.title, window.location.pathname);
 
                 login(token, {
                     ...user,
