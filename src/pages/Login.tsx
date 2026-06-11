@@ -8,13 +8,12 @@ import { api } from '@/services/api'
 import { motion } from 'framer-motion'
 
 export default function Login() {
-  const { login, user, signOut } = useAuth()
+  const { login, user } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     // 🧹 LIMPEZA DE SEGURANÇA: Remove qualquer lixo de sessão antiga que possa causar loops
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
     
     if (token && !user) {
         console.log("🧹 Limpando sessão fantasma detectada...");
