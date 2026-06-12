@@ -10,6 +10,9 @@ interface Transaction {
     type: 'income' | 'expense';
     category: string;
     date: string;
+    installmentGroupId?: string | null;
+    installmentNumber?: number | null;
+    installmentCount?: number | null;
 }
 
 interface TransactionListProps {
@@ -82,6 +85,11 @@ export const TransactionList = ({ transactions, onDelete }: TransactionListProps
                                                     <p className="font-semibold text-sm tracking-tight text-foreground">{t.description}</p>
                                                     <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
                                                         <Tag className="h-3 w-3 opacity-70" /> {t.category}
+                                                        {t.installmentNumber && t.installmentCount && (
+                                                            <span className="ml-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-bold normal-case">
+                                                                Parcela {t.installmentNumber}/{t.installmentCount}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

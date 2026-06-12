@@ -1,0 +1,41 @@
+// Categorias padronizadas (pt-BR) — espelham as listas validadas pelo backend
+// (server.js: EXPENSE_CATEGORIES / INCOME_CATEGORIES, validação estrita → 400).
+export const EXPENSE_CATEGORIES = [
+    'Alimentação',
+    'Moradia',
+    'Transporte',
+    'Saúde',
+    'Educação',
+    'Lazer',
+    'Compras',
+    'Assinaturas',
+    'Contas',
+    'Impostos',
+    'Seguros',
+    'Pets',
+    'Viagens',
+    'Investimentos',
+    'Presentes',
+    'Doações',
+    'Cuidados Pessoais',
+    'Vestuário',
+    'Tecnologia',
+    'Trabalho',
+    'Empréstimos',
+    'Família',
+    'Emergências',
+    'Outros',
+] as const;
+
+export const INCOME_CATEGORIES = [
+    'Salário',
+    'Freelance',
+    'Comissões',
+    'Investimentos',
+    'Aluguel',
+    'Reembolsos',
+    'Prêmios',
+    'Vendas',
+    'Benefícios',
+    'Outros',
+] as const;

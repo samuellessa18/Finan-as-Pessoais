@@ -14,7 +14,7 @@ import { trackBehaviorEvent } from '../services/telemetry';
 import { toast } from 'sonner';
 
 const Index = () => {
-    const { transactions, addTransaction, deleteTransaction, summary, lastUpdated } = useTransactions();
+    const { transactions, addTransaction, addInstallments, deleteTransaction, summary, lastUpdated } = useTransactions();
     const { user } = useAuth();
     const { xp, level, streakDays, progressToNextLevel, currentLevelXp, xpForNextLevel, refreshGamification } = useGamification();
     
@@ -79,6 +79,13 @@ const Index = () => {
 
     const handleAddTransaction = async (tx: any) => {
         await addTransaction(tx);
+        await refreshGamification();
+    };
+
+    const handleAddInstallments = async (data: {
+        description: string; category: string; totalAmount: number; installments: number;
+    }) => {
+        await addInstallments(data);
         await refreshGamification();
     };
 
@@ -382,7 +389,7 @@ const Index = () => {
             {/* Transactions Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                    <TransactionForm onAdd={handleAddTransaction} />
+                    <TransactionForm onAdd={handleAddTransaction} onAddInstallments={handleAddInstallments} />
                 </div>
                 <div className="lg:col-span-2">
                     <TransactionList transactions={transactions} onDelete={handleDeleteTransaction} />
