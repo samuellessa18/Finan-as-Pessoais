@@ -58,8 +58,11 @@ export const useTransactions = () => {
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
       const res = await api.post('/transactions', transaction);
-      if (res.data.transaction) {
-        setTransactions((prev) => [res.data.transaction, ...prev]);
+      // O backend retorna o objeto da transação direto (res.json(transaction)),
+      // não { transaction }. Antes checava res.data.transaction (sempre undefined),
+      // então a lista/summary nunca atualizavam após criar.
+      if (res.data?.id) {
+        setTransactions((prev) => [res.data, ...prev]);
         await fetchSummary();
         setLastUpdated(Date.now());
       }
