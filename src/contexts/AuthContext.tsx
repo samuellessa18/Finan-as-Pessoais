@@ -9,6 +9,7 @@ interface User {
     onboardingCompleted: boolean;
     monthlyIncome?: number;
     plan?: 'free' | 'pro';
+    role?: 'user' | 'admin' | 'super_admin';
     user_metadata?: {
         full_name?: string;
         avatar_url?: string;
@@ -96,6 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 onboardingCompleted: userData.onboardingCompleted,
                 monthlyIncome: userData.monthlyIncome,
                 plan: userData.plan,
+                role: userData.role,
                 user_metadata: {
                     full_name: userData.name
                 }
