@@ -1,6 +1,7 @@
 import { Bell, Check, CheckCircle2, TrendingUp, Target, Bot, ChevronDown } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
 import type { Notification } from '@/contexts/NotificationContext';
+import { PatternAlertsSection } from '@/components/PatternAlertsSection';
 
 export default function Notifications() {
   const { notifications, markAsRead, markAllAsRead, loading, unreadCount } = useNotifications();
@@ -77,6 +78,9 @@ export default function Notifications() {
           </button>
         )}
       </div>
+
+      {/* [FASE 3.4] Alertas de PADRÃO (GET /api/v1/patterns) — fonte separada das notificações */}
+      <PatternAlertsSection />
 
       <div className="space-y-10">
           {Object.entries(groupedNotifications).map(([dayKey, dayNotes]) => (
