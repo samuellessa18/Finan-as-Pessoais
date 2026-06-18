@@ -1,4 +1,4 @@
-import { Home, Target, Brain, Bell, LogOut, ShieldCheck } from 'lucide-react';
+import { Home, Target, Brain, Bell, LogOut, ShieldCheck, Wallet } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -12,6 +12,7 @@ export function Sidebar() {
   const links = [
     { name: 'Dashboard', path: '/', icon: Home },
     { name: 'Planejamentos', path: '/goals', icon: Target },
+    { name: 'Orçamento', path: '/orcamento', icon: Wallet },
     { name: 'IA Financeira', path: '/insights', icon: Brain },
     { name: 'Notificações', path: '/notifications', icon: Bell },
     // [ADMIN] Visível apenas para super_admin (RBAC por role).

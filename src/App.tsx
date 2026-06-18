@@ -9,6 +9,7 @@ import Insights from './pages/Insights'
 import Notifications from './pages/Notifications'
 import Onboarding from './pages/Onboarding'
 import Admin from './pages/Admin'
+import Budget from './pages/Budget'
 import PrivateRoute from './routes/PrivateRoute'
 import MainLayout from './components/MainLayout'
 import { Toaster } from 'sonner'
@@ -42,6 +43,7 @@ function App() {
             <Route path="goals" element={<Goals />} />
             <Route path="insights" element={<Insights />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="orcamento" element={<Budget />} />
             <Route path="admin" element={<Admin />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
