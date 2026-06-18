@@ -1,6 +1,8 @@
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAuth } from '@/contexts/AuthContext';
 import { SummaryCards } from '@/components/SummaryCards';
+import { ScoreCard } from '@/components/ScoreCard';
+import { useScore } from '@/hooks/useScore';
 import { TransactionForm } from '@/components/TransactionForm';
 import { TransactionList } from '@/components/TransactionList';
 import { FinanceCharts } from '@/components/FinanceCharts';
@@ -15,6 +17,7 @@ import { toast } from 'sonner';
 
 const Index = () => {
     const { transactions, addTransaction, addInstallments, deleteTransaction, summary, lastUpdated } = useTransactions();
+    const { score, loading: scoreLoading } = useScore(lastUpdated);
     const { user } = useAuth();
     const { xp, level, streakDays, progressToNextLevel, currentLevelXp, xpForNextLevel, refreshGamification } = useGamification();
     
@@ -374,8 +377,11 @@ const Index = () => {
                 </div>
             )}
 
+            {/* Score Financeiro */}
+            <ScoreCard data={score} loading={scoreLoading} />
+
             {/* Financial Overview Metrics */}
-            <SummaryCards 
+            <SummaryCards
                 totalBalance={summary.totalBalance} 
                 totalIncome={summary.totalIncome} 
                 totalExpenses={summary.totalExpenses} 
