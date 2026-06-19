@@ -1,6 +1,8 @@
-import { Brain, Flame, ArrowUpRight, TrendingUp, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Brain, Flame, ArrowUpRight, TrendingUp, ShieldCheck, RefreshCw, Sparkles, Lock, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getInsights, getEmotionalAnalytics, generateInsight } from '../services/userService';
+import { useAuth } from '@/contexts/AuthContext';
+import { narrate, type FinancialNarration } from '../services/narrationService';
 
 interface Insight {
     id: string | number;
@@ -14,6 +16,30 @@ export default function Insights() {
   const [behavioral, setBehavioral] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+
+  // [FASE 4.5] Narração financeira (POST /insights/narrate). Pré-gate por plano:
+  // usuários não-premium NÃO chamam o endpoint (evita 403, que o interceptor
+  // global do AuthContext transformaria em logout) — recebem a CTA diretamente.
+  const { user } = useAuth();
+  const isPremiumUser = ['pro', 'premium'].includes(String(user?.plan));
+  const [narration, setNarration] = useState<FinancialNarration | null>(null);
+  const [narrLoading, setNarrLoading] = useState(false);
+  const [narrError, setNarrError] = useState<string | null>(null);
+
+  const handleNarrate = async () => {
+    try {
+      setNarrLoading(true);
+      setNarrError(null);
+      setNarration(await narrate());
+    } catch (e) {
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status === 429) setNarrError('Limite de análises atingido. Tente novamente mais tarde.');
+      else if (status === 403) setNarrError('Recurso disponível para usuários Premium.');
+      else setNarrError('Não foi possível gerar a narração. Tente novamente.');
+    } finally {
+      setNarrLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -117,6 +143,64 @@ export default function Insights() {
                 </div>
             </div>
         </div>
+      </div>
+
+      {/* [FASE 4.5] Narração Financeira — POST /insights/narrate (provider deterministic) */}
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" /> Narração Financeira
+          </h2>
+          {isPremiumUser && (
+            <button
+              onClick={handleNarrate}
+              disabled={narrLoading}
+              className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${narrLoading ? 'animate-spin' : ''}`} />
+              {narrLoading ? 'Analisando...' : 'Gerar análise'}
+            </button>
+          )}
+        </div>
+
+        {!isPremiumUser ? (
+          <div className="glass-card p-8 rounded-2xl text-center border-dashed border-2">
+            <Lock className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-60" />
+            <p className="font-medium">Recurso disponível para usuários Premium.</p>
+          </div>
+        ) : narrLoading ? (
+          <div className="glass-card p-12 rounded-2xl flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : narrError ? (
+          <div className="glass-card p-6 rounded-2xl border-l-4 border-l-warning bg-warning/5">
+            <p className="text-sm font-medium text-foreground">{narrError}</p>
+          </div>
+        ) : narration ? (
+          <div className="glass-card p-6 rounded-2xl border-t-4 border-t-primary space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="text-base font-bold tracking-tight">{narration.title}</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground px-2 py-1 rounded-full whitespace-nowrap">
+                Análise determinística
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">{narration.summary}</p>
+            {narration.recommendations.length > 0 && (
+              <ul className="space-y-1.5 pt-1">
+                {narration.recommendations.map((r, i) => (
+                  <li key={i} className="text-sm text-foreground flex gap-2">
+                    <span className="text-primary font-bold">•</span><span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="glass-card p-8 rounded-2xl text-center border-dashed">
+            <p className="text-muted-foreground font-medium">Nenhuma narração disponível.</p>
+            <p className="text-muted-foreground/70 text-sm mt-1">Clique em "Gerar análise" para interpretar seus dados financeiros.</p>
+          </div>
+        )}
       </div>
 
       <h2 className="text-lg font-bold tracking-tight mb-4 flex items-center gap-2">Feed do Consultor</h2>
