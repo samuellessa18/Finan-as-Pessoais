@@ -11,13 +11,21 @@ export const api = axios.create({
   },
 });
 
-// 🔄 RESILIÊNCIA: Retry automático para erros de rede ou 5xx
+// 🔄 RESILIÊNCIA: Retry automático para erros de rede ou 5xx.
+// [FASE 4.6A-bis] Política POR MÉTODO: só métodos HTTP SEGUROS (GET/HEAD/OPTIONS)
+// podem repetir. POST/PATCH/PUT/DELETE NUNCA repetem — um retry em nível de rede
+// após o servidor já ter processado a requisição duplicaria efeitos colaterais
+// (transação, parcelas, Insight, meta, quota e custo LLM futuro). Novos endpoints
+// mutantes ficam protegidos automaticamente (sem allowlist a manter).
+const SAFE_RETRY_METHODS = ['get', 'head', 'options'];
 axiosRetry(api, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
+    const method = (error.config?.method ?? '').toLowerCase();
+    if (!SAFE_RETRY_METHODS.includes(method)) return false; // não repetir métodos mutantes
     return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status === 500;
-  }
+  },
 });
 
 api.interceptors.request.use((config) => {

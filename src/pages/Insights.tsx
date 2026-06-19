@@ -32,8 +32,11 @@ export default function Insights() {
       setNarrError(null);
       setNarration(await narrate());
     } catch (e) {
-      const status = (e as { response?: { status?: number } })?.response?.status;
-      if (status === 429) setNarrError('Limite de análises atingido. Tente novamente mais tarde.');
+      const err = e as { code?: string; response?: { status?: number } };
+      const status = err?.response?.status;
+      // [FASE 4.6B] timeout do axios → code 'ECONNABORTED' (sem response).
+      if (err?.code === 'ECONNABORTED') setNarrError('A análise demorou mais que o esperado. Tente novamente.');
+      else if (status === 429) setNarrError('Limite de análises atingido. Tente novamente mais tarde.');
       else if (status === 403) setNarrError('Recurso disponível para usuários Premium.');
       else setNarrError('Não foi possível gerar a narração. Tente novamente.');
     } finally {
