@@ -1,4 +1,4 @@
-import { Home, Target, Brain, Bell, LogOut, ShieldCheck, Wallet, BarChart3 } from 'lucide-react';
+import { Home, Target, Brain, Bell, LogOut, ShieldCheck, Wallet, BarChart3, Landmark } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
@@ -13,6 +13,7 @@ export function Sidebar() {
     { name: 'Dashboard', path: '/', icon: Home },
     { name: 'Planejamentos', path: '/goals', icon: Target },
     { name: 'Orçamento', path: '/orcamento', icon: Wallet },
+    { name: 'Contas', path: '/contas', icon: Landmark },
     { name: 'Insights', path: '/painel', icon: BarChart3 },
     { name: 'IA Financeira', path: '/insights', icon: Brain },
     { name: 'Notificações', path: '/notifications', icon: Bell },
